@@ -129,6 +129,9 @@ make_test_collections <- function(query, rel_docs, docs, interactors, num_rel, n
     pairs <- tibble()
     for (j in 1:length(prots)) {
       
+      if ( nrow(pairs) == length(rel_nc) )
+        break
+      
       # choose pair
       pair <- c(prots[2*j - 1], prots[2*j]) %>% sort
       
@@ -141,9 +144,6 @@ make_test_collections <- function(query, rel_docs, docs, interactors, num_rel, n
           tibble(ProteinA = pair[1], ProteinB = pair[2])
         )
       }
-      
-      if ( nrow(pairs) == length(rel_nc) )
-        break
       
     }
     
@@ -161,13 +161,59 @@ make_test_collections <- function(query, rel_docs, docs, interactors, num_rel, n
   return(tcs)
 }
 
-query <- test_collections$Query[2]
-rel_docs <- test_collections$Rel_documents[[2]]
-docs <- mparams$Protein
-interactors <- test_collections$Interactors[[2]]
-num_rel <- 1
-num <- 20
-make_test_collections(query, rel_docs, docs, interactors, num_rel, num)
+# # 36 relevant documents
+# query <- "O14920"
+# rel_docs <- (test_collections %>% filter(Query == query))$Rel_documents[[1]]
+# docs <- mparams$Protein
+# interactors <- (test_collections %>% filter(Query == query))$Interactors[[1]]
+# num_rel <- 1
+# num <- 20
+# tcs <- make_test_collections(query, rel_docs, docs, interactors, num_rel, num)
+# 
+# # 1 relevant document
+# query <- "Q9UBE0"
+# rel_docs <- (test_collections %>% filter(Query == query))$Rel_documents[[1]]
+# docs <- mparams$Protein
+# interactors <- (test_collections %>% filter(Query == query))$Interactors[[1]]
+# num_rel <- 1
+# num <- 20
+# tcs1 <- make_test_collections(query, rel_docs, docs, interactors, num_rel, num)
+# 
+# # 2 relevant documents
+# query <- "P20333"
+# rel_docs <- (test_collections %>% filter(Query == query))$Rel_documents[[1]]
+# docs <- mparams$Protein
+# interactors <- (test_collections %>% filter(Query == query))$Interactors[[1]]
+# num_rel <- 1
+# num <- 20
+# tcs2 <- make_test_collections(query, rel_docs, docs, interactors, num_rel, num)
+# 
+# # 3 relevant documents
+# query <- "O75496"
+# rel_docs <- (test_collections %>% filter(Query == query))$Rel_documents[[1]]
+# docs <- mparams$Protein
+# interactors <- (test_collections %>% filter(Query == query))$Interactors[[1]]
+# num_rel <- 1
+# num <- 20
+# tcs3 <- make_test_collections(query, rel_docs, docs, interactors, num_rel, num)
+# 
+# # 4 relevant documents
+# query <- "Q13541"
+# rel_docs <- (test_collections %>% filter(Query == query))$Rel_documents[[1]]
+# docs <- mparams$Protein
+# interactors <- (test_collections %>% filter(Query == query))$Interactors[[1]]
+# num_rel <- 1
+# num <- 20
+# tcs4 <- make_test_collections(query, rel_docs, docs, interactors, num_rel, num)
+# 
+# # 5 relevant documents
+# query <- "Q14653"
+# rel_docs <- (test_collections %>% filter(Query == query))$Rel_documents[[1]]
+# docs <- mparams$Protein
+# interactors <- (test_collections %>% filter(Query == query))$Interactors[[1]]
+# num_rel <- 1
+# num <- 20
+# tcs5 <- make_test_collections(query, rel_docs, docs, interactors, num_rel, num)
 
 # Test collections
 all_docs <- mparams$Protein
