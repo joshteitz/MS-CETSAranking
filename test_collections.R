@@ -124,37 +124,35 @@ make_test_collections <- function(query, rel_docs, docs, interactors, num_rel, n
       }
     }
     
-    # Choose pairs of proteins that are not involved in interactions.
+    # Sample some proteins that do not interact with the query
     prots <- sample(docs) # shuffle proteins
-    pairs <- tibble()
-    for (j in 1:length(prots)) {
+    # initialize proteins that do not interact
+    prots_ni <- vector(mode = "character", length = length(rel_nc))
+    j <- 1 # counter for prots
+    k <- 1 # counter for prots_ni
+    while( k <= length(rel_nc) ) {
       
-      if ( nrow(pairs) == length(rel_nc) )
-        break
+      # sample protein
+      prot <- prots[j]
       
-      # choose pair
-      pair <- c(prots[2*j - 1], prots[2*j]) %>% sort
-      
-      # make sure pair is not an interaction
-      if ( (all_ints %>% filter(ProteinA == pair[1] & ProteinB == pair[2]) %>% nrow) == 0 ) {
-        
-        # Add pair to existing pairs
-        pairs <- bind_rows(
-          pairs,
-          tibble(ProteinA = pair[1], ProteinB = pair[2])
-        )
+      # if not interactor of query
+      if ( !(prot %in% interactors) ) {
+        prots_ni[k] <- prot
+        k <- k + 1
       }
       
+      j <- j + 1
     }
     
     # Form test collection.
-    # T_pos/T_neg are pairs of proteins for training weakly supervised metric learners
+    # Pos: relevant proteins that were not chosen.
+    # Neg: Random sample of proteins that are not interactors (same size as Pos)
     tcs[[i]] <- list(
       Q = query,
       D = c(D_rel, D_nrel),
       R = tibble(Query = query, Document = D_rel),
-      T_pos = tibble(ProteinA = query, ProteinB = rel_nc),
-      T_neg = pairs
+      Pos = rel_nc,
+      Neg = prots_ni
     )
   }
   
