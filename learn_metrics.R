@@ -19,31 +19,31 @@ training_sets <- read_rds(paste0(here(), "/training_sets.rds"))
 trs <- training_sets$Tr
 trs_p <- training_sets$Tr_param
 
-set.seed(27)
-inds <- sample.int(nrow(training_sets), 100)
+# set.seed(27)
+# inds <- sample.int(nrow(training_sets), 100)
 
 print("Learning ITML metrics...")
 pb <- progress_bar$new(total = nrow(training_sets))
-pb <- progress_bar$new(total = 100)
-itml_metrics <- tibble(ITML = map(trs[inds], ~ {pb$tick(); learn_itml(.x, min_num = 10, use_neg_pairs = F)}))
+# pb <- progress_bar$new(total = 100)
+itml_metrics <- tibble(ITML = map(trs, ~ {pb$tick(); learn_itml(.x, min_num = 10, use_neg_pairs = F)}))
 
 print("Learning ITML metrics with negative training examples...")
 pb <- progress_bar$new(total = nrow(training_sets))
-pb <- progress_bar$new(total = 100)
+# pb <- progress_bar$new(total = 100)
 itml_metrics <- itml_metrics %>%
-  mutate(ITML_neg = map(trs[inds], ~ {pb$tick(); learn_itml(.x, min_num = 10, use_neg_pairs = T)}))
+  mutate(ITML_neg = map(trs, ~ {pb$tick(); learn_itml(.x, min_num = 10, use_neg_pairs = T)}))
 
 print("Learning ITML metrics on parametric training data")
 pb <- progress_bar$new(total = nrow(training_sets))
-pb <- progress_bar$new(total = 100)
+# pb <- progress_bar$new(total = 100)
 itml_metrics <- itml_metrics %>%
-  mutate(ITML_par = map(trs_p[inds], ~ {pb$tick(); learn_itml(.x, min_num = 10, use_neg_pairs = F)}))
+  mutate(ITML_par = map(trs_p, ~ {pb$tick(); learn_itml(.x, min_num = 10, use_neg_pairs = F)}))
 
 print("Learning ITML metrics on parametric training data with negative training examples")
 pb <- progress_bar$new(total = nrow(training_sets))
-pb <- progress_bar$new(total = 100)
+# pb <- progress_bar$new(total = 100)
 itml_metrics <- itml_metrics %>%
-  mutate(ITML_par_neg = map(trs_p[inds], ~ {pb$tick(); learn_itml(.x, min_num = 10, use_neg_pairs = T)}))
+  mutate(ITML_par_neg = map(trs_p, ~ {pb$tick(); learn_itml(.x, min_num = 10, use_neg_pairs = T)}))
 
 write_rds(itml_metrics, paste0(here(), "/itml_metrics.rds"))
 
