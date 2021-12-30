@@ -64,3 +64,7 @@ write_rds(itml_metrics, paste0(here(), "/itml_metrics.rds"))
 # 
 # learn_mmc(tr, min_num = 10, use_neg_pairs = F)
 
+# tr = (itml_metrics %>% filter(Q == "P51668" & R_doc == "O15033"))$Tr[[1]]
+# res <- learn_itml(tr, min_num = 10, use_neg_pairs = T)
+# 
+# py_save_object(tr, "tr.pickle")

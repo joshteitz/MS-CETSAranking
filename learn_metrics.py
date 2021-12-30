@@ -16,10 +16,18 @@ def learn_itml(tr, min_num = 10, use_neg_pairs = True):
   # fit model to training data
   itml = ITML(preprocessor = tr["X"])
   if use_neg_pairs:
-    itml.fit(tr["pairs_indices"], tr["y_pairs"])
+    try:
+      itml.fit(tr["pairs_indices"], tr["y_pairs"])
+    except ValueError:
+      print("ValueError occured!")
+      return None
   else:
     neg_index = tr["y_pairs"].index(-1)
-    itml.fit(tr["pairs_indices"][:neg_index], tr["y_pairs"][:neg_index])
+    try:
+      itml.fit(tr["pairs_indices"][:neg_index], tr["y_pairs"][:neg_index])
+    except ValueError:
+      print("ValueError occured!")
+      return None
 
   return(itml.get_mahalanobis_matrix())
   
