@@ -154,6 +154,34 @@ IR2 <- IR2 %>% mutate(ITML_par_neg = map2_int(training_sets$TC, itml_metrics$ITM
 write_rds(IR1, paste0(here(), "/IR1.rds"))
 write_rds(IR2, paste0(here(), "/IR2.rds"))
 
+IR1 <- read_rds(paste0(here(), "/IR1.rds"))
+IR2 <- read_rds(paste0(here(), "/IR2.rds"))
+
+# Mean ranks
+IR1 %>% summarize(across(Eucl:Par, ~ mean(.x, na.rm = T)))
+IR2 %>% summarize(across(ITML:ITML_par_neg, ~ mean(.x, na.rm = T)))
+
+# Indicator for test collections that result in a null metric
+null_metrics <- map_lgl(itml_metrics$ITML_par_neg, ~ is.null(.x))
+
+IR1[!null_metrics,] %>% summarize(across(Eucl:Par, ~ mean(.x, na.rm = T)))
+
+# of positive examples in each training set
+num_pos <- map_int(training_sets$TC, ~ length(.x$Pos))
+
+# correlations
+rks <- IR1$Eucl
+cor_df <- tibble(
+  Num_pos = num_pos,
+  Rank = rks
+) %>%
+  filter(Num_pos >= 5)
+
+cor_df %>%
+  group_by(Rng = cut(Num_pos, breaks = seq(5, 120, by = 5), right = F)) %>%
+  summarize(Mean_rank = mean(Rank))
+  
+
 # mean_ranks: find the mean rank for each IR system
 # Arguments:
 #   1. IR_res: IR system results

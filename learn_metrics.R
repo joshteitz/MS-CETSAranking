@@ -31,29 +31,32 @@ itml_metrics <- tibble(
 
 # itml_metrics <- itml_metrics[inds,]
 
+# Set minimum number of training examples
+MIN_NUM = 6
+
 print("Learning ITML metrics...")
 pb <- progress_bar$new(total = nrow(training_sets))
 # pb <- progress_bar$new(total = 100)
 itml_metrics <- itml_metrics %>%
-  mutate(ITML = pmap(list(Q, R_doc, Tr), ~ {pb$tick(); learn_itml(..3, min_num = 10, use_neg_pairs = F)}))
+  mutate(ITML = pmap(list(Q, R_doc, Tr), ~ {pb$tick(); learn_itml(..3, min_num = MIN_NUM, use_neg_pairs = F)}))
 
 print("Learning ITML metrics with negative training examples...")
 pb <- progress_bar$new(total = nrow(training_sets))
 # pb <- progress_bar$new(total = 100)
 itml_metrics <- itml_metrics %>%
-  mutate(ITML_neg = pmap(list(Q, R_doc, Tr), ~ {pb$tick(); print(paste(..1, ..2)); learn_itml(..3, min_num = 10, use_neg_pairs = T)}))
+  mutate(ITML_neg = pmap(list(Q, R_doc, Tr), ~ {pb$tick(); print(paste(..1, ..2)); learn_itml(..3, min_num = MIN_NUM, use_neg_pairs = T)}))
 
 print("Learning ITML metrics on parametric training data...")
 pb <- progress_bar$new(total = nrow(training_sets))
 # pb <- progress_bar$new(total = 100)
 itml_metrics <- itml_metrics %>%
-  mutate(ITML_par = pmap(list(Q, R_doc, Tr_p), ~ {pb$tick(); learn_itml(..3, min_num = 10, use_neg_pairs = F)}))
+  mutate(ITML_par = pmap(list(Q, R_doc, Tr_p), ~ {pb$tick(); learn_itml(..3, min_num = MIN_NUM, use_neg_pairs = F)}))
 
 print("Learning ITML metrics on parametric training data with negative training examples")
 pb <- progress_bar$new(total = nrow(training_sets))
 # pb <- progress_bar$new(total = 100)
 itml_metrics <- itml_metrics %>%
-  mutate(ITML_par_neg = pmap(list(Q, R_doc, Tr_p), ~ {pb$tick(); learn_itml(..3, min_num = 10, use_neg_pairs = T)}))
+  mutate(ITML_par_neg = pmap(list(Q, R_doc, Tr_p), ~ {pb$tick(); learn_itml(..3, min_num = MIN_NUM, use_neg_pairs = T)}))
 
 write_rds(itml_metrics, paste0(here(), "/itml_metrics.rds"))
 
