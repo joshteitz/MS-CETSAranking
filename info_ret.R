@@ -8,8 +8,9 @@ mparams <- param_mdata(mdata)
 
 # Load test collections and learned metrics
 training_sets <- read_rds(paste0(here(), "/training_sets.rds"))
-itml_metrics <- read_rds(paste0(here(), "/itml_metrics.rds"))
-mmc_metrics <- read_rds(paste0(here(), "/mmc_metrics.rds"))
+learned_metrics <- read_rds(paste0(here(), "/learned_metrics.rds"))
+# itml_metrics <- read_rds(paste0(here(), "/itml_metrics.rds"))
+# mmc_metrics <- read_rds(paste0(here(), "/mmc_metrics.rds"))
 
 # IR-Mahal: Rank documents in order of increasing Mahalanobis distance
 # Arguments:
@@ -108,8 +109,8 @@ IR_Par <- function(tc, M = NULL) {
   return(match(tc$R$Document, rk))
 }
 
-set.seed(27)
-inds <- sample.int(nrow(training_sets), 100)
+# set.seed(27)
+# inds <- sample.int(nrow(training_sets), 100)
 
 # # IR1: Results for IR-Eucl, IR-Pear, and IR-Par
 # IR1 <- tibble(Q = itml_metrics$Q, R_doc = itml_metrics$R_doc)
@@ -152,32 +153,65 @@ inds <- sample.int(nrow(training_sets), 100)
 # # pb <- progress_bar$new(total = 100)
 # IR2 <- IR2 %>% mutate(ITML_par_neg = map2_int(training_sets$TC, itml_metrics$ITML_par_neg, ~{pb$tick(); IR_Par(.x, .y)}))
 
-# IR3: Results for IR-MMC-id, IR-MMC-rand, IR-MMC-Par-id, IR-MMC-Par-rand
-IR3 <- tibble(Q = mmc_metrics$Q, R_doc = mmc_metrics$R_doc)
+# IR: Results for IR-Eucl, IR-Pear, IR-Par, IR-ITML, IR-ITML-neg, IR-MMC-neg
+IR <- tibble(Q = itml_metrics$Q, R_doc = itml_metrics$R_doc)
+
+print("Results for IR-Eucl...")
+pb <- progress_bar$new(total = nrow(training_sets))
+# pb <- progress_bar$new(total = 100)
+IR <- IR %>% mutate(Eucl = map_int(training_sets$TC, ~{pb$tick(); IR_Mahal(.x, diag(9))}))
+
+print("Results for IR-Pear...")
+pb <- progress_bar$new(total = nrow(training_sets))
+# pb <- progress_bar$new(total = 100)
+IR <- IR %>% mutate(Pear = map_int(training_sets$TC, ~{pb$tick(); IR_Pear(.x)}))
+
+print("Results for IR-Par...")
+pb <- progress_bar$new(total = nrow(training_sets))
+# pb <- progress_bar$new(total = 100)
+IR <- IR %>% mutate(Par = map_int(training_sets$TC, ~{pb$tick(); IR_Par(.x, diag(3))}))
+
+print("Results for IR-ITML...")
+pb <- progress_bar$new(total = nrow(training_sets))
+# pb <- progress_bar$new(total = 100)
+IR <- IR %>% mutate(ITML = map2_int(training_sets$TC, learned_metrics$ITML, ~{pb$tick(); IR_Mahal(.x, .y)}))
+
+print("Results for IR-ITML-neg...")
+pb <- progress_bar$new(total = nrow(training_sets))
+# pb <- progress_bar$new(total = 100)
+IR <- IR %>% mutate(ITML_neg = map2_int(training_sets$TC, learned_metrics$ITML_neg, ~{pb$tick(); IR_Mahal(.x, .y)}))
 
 print("Results for IR-MMC-id...")
 pb <- progress_bar$new(total = nrow(training_sets))
 # pb <- progress_bar$new(total = 100)
-IR3 <- IR3 %>% mutate(MMC_id = map2_int(training_sets$TC, mmc_metrics$MMC_id, ~{pb$tick(); IR_Mahal(.x, .y)}))
+IR <- IR %>% mutate(MMC_neg = map2_int(training_sets$TC, learned_metrics$MMC_neg, ~{pb$tick(); IR_Mahal(.x, .y)}))
 
-print("Results for IR-MMC-rand...")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-IR3 <- IR3 %>% mutate(MMC_rand = map2_int(training_sets$TC, mmc_metrics$MMC_rand, ~{pb$tick(); IR_Mahal(.x, .y)}))
-
-print("Results for IR-MMC-Par-id...")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-IR3 <- IR3 %>% mutate(MMC_par_id = map2_int(training_sets$TC, mmc_metrics$MMC_par_id, ~{pb$tick(); IR_Par(.x, .y)}))
-
-print("Results for IR-MMC-Par-rand...")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-IR3 <- IR3 %>% mutate(MMC_par_rand = map2_int(training_sets$TC, mmc_metrics$MMC_par_rand, ~{pb$tick(); IR_Par(.x, .y)}))
+# # IR3: Results for IR-MMC-id, IR-MMC-rand, IR-MMC-Par-id, IR-MMC-Par-rand
+# IR3 <- tibble(Q = mmc_metrics$Q, R_doc = mmc_metrics$R_doc)
+# 
+# print("Results for IR-MMC-id...")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# IR3 <- IR3 %>% mutate(MMC_id = map2_int(training_sets$TC, mmc_metrics$MMC_id, ~{pb$tick(); IR_Mahal(.x, .y)}))
+# 
+# print("Results for IR-MMC-rand...")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# IR3 <- IR3 %>% mutate(MMC_rand = map2_int(training_sets$TC, mmc_metrics$MMC_rand, ~{pb$tick(); IR_Mahal(.x, .y)}))
+# 
+# print("Results for IR-MMC-Par-id...")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# IR3 <- IR3 %>% mutate(MMC_par_id = map2_int(training_sets$TC, mmc_metrics$MMC_par_id, ~{pb$tick(); IR_Par(.x, .y)}))
+# 
+# print("Results for IR-MMC-Par-rand...")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# IR3 <- IR3 %>% mutate(MMC_par_rand = map2_int(training_sets$TC, mmc_metrics$MMC_par_rand, ~{pb$tick(); IR_Par(.x, .y)}))
 
 # write_rds(IR1, paste0(here(), "/IR1.rds"))
 # write_rds(IR2, paste0(here(), "/IR2.rds"))
-write_rds(IR3, paste0(here(), "/IR3.rds"))
+write_rds(IR, paste0(here(), "/IR.rds"))
 
 # IR1 <- read_rds(paste0(here(), "/IR1.rds"))
 # IR2 <- read_rds(paste0(here(), "/IR2.rds"))

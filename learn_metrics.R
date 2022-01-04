@@ -17,35 +17,34 @@ training_sets <- read_rds(paste0(here(), "/training_sets.rds"))
 
 # training sets
 trs <- training_sets$Tr
-trs_p <- training_sets$Tr_param
 
 # set.seed(27)
 # inds <- sample.int(nrow(training_sets), 100)
-# 
-# # ITML metrics
-# itml_metrics <- tibble(
-#   Q = map_chr(training_sets$TC, ~ .x$Q),
-#   R_doc = map_chr(training_sets$TC, ~ .x$R$Document),
-#   Tr = trs,
-#   Tr_p = trs_p
-# )
+ 
+# ITML metrics
+learned_metrics <- tibble(
+  Q = map_chr(training_sets$TC, ~ .x$Q),
+  R_doc = map_chr(training_sets$TC, ~ .x$R$Document),
+  Tr = trs,
+) %>%
+  mutate(Tr_size = map_int(Tr, ~ .x$y_pairs %>% length))
 
 # itml_metrics <- itml_metrics[inds,]
 
 # Set minimum number of training examples
 MIN_NUM = 6
 
-# print("Learning ITML metrics...")
-# pb <- progress_bar$new(total = nrow(training_sets))
-# # pb <- progress_bar$new(total = 100)
-# itml_metrics <- itml_metrics %>%
-#   mutate(ITML = pmap(list(Q, R_doc, Tr), ~ {pb$tick(); learn_itml(..3, min_num = MIN_NUM, use_neg_pairs = F)}))
-# 
-# print("Learning ITML metrics with negative training examples...")
-# pb <- progress_bar$new(total = nrow(training_sets))
-# # pb <- progress_bar$new(total = 100)
-# itml_metrics <- itml_metrics %>%
-#   mutate(ITML_neg = pmap(list(Q, R_doc, Tr), ~ {pb$tick(); print(paste(..1, ..2)); learn_itml(..3, min_num = MIN_NUM, use_neg_pairs = T)}))
+print("Learning ITML metrics...")
+pb <- progress_bar$new(total = nrow(training_sets))
+# pb <- progress_bar$new(total = 100)
+learned_metrics <- learned_metrics %>%
+  mutate(ITML = pmap(list(Q, R_doc, Tr), ~ {pb$tick(); learn_itml(..3, min_num = MIN_NUM, use_neg_pairs = F)}))
+
+print("Learning ITML metrics with negative training examples...")
+pb <- progress_bar$new(total = nrow(training_sets))
+# pb <- progress_bar$new(total = 100)
+learned_metrics <- learned_metrics %>%
+  mutate(ITML_neg = pmap(list(Q, R_doc, Tr), ~ {pb$tick(); learn_itml(..3, min_num = MIN_NUM, use_neg_pairs = T)}))
 # 
 # print("Learning ITML metrics on parametric training data...")
 # pb <- progress_bar$new(total = nrow(training_sets))
@@ -59,53 +58,53 @@ MIN_NUM = 6
 # itml_metrics <- itml_metrics %>%
 #   mutate(ITML_par_neg = pmap(list(Q, R_doc, Tr_p), ~ {pb$tick(); learn_itml(..3, min_num = MIN_NUM, use_neg_pairs = T)}))
 
-# MMC metrics
-mmc_metrics <- tibble(
-  Q = map_chr(training_sets$TC, ~ .x$Q),
-  R_doc = map_chr(training_sets$TC, ~ .x$R$Document),
-  Tr = trs,
-  Tr_p = trs_p
-)
+# # MMC metrics
+# mmc_metrics <- tibble(
+#   Q = map_chr(training_sets$TC, ~ .x$Q),
+#   R_doc = map_chr(training_sets$TC, ~ .x$R$Document),
+#   Tr = trs,
+#   Tr_p = trs_p
+# )
 
 print("Learning MMC metrics with identity initialization and negative training examples")
 pb <- progress_bar$new(total = nrow(training_sets))
 # pb <- progress_bar$new(total = 100)
-mmc_metrics <- mmc_metrics %>%
-  mutate(MMC_id = pmap(list(Q, R_doc, Tr), ~ {
+learned_metrics <- learned_metrics %>%
+  mutate(MMC_neg = pmap(list(Q, R_doc, Tr), ~ {
     pb$tick(); 
     learn_mmc(..3, min_num = MIN_NUM, use_neg_pairs = T, diag = T, initialization = "identity")
   }))
 
-print("Learning MMC metrics with random initialization and negative training examples")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-mmc_metrics <- mmc_metrics %>%
-  mutate(MMC_rand = pmap(list(Q, R_doc, Tr), ~ {
-    pb$tick(); 
-    learn_mmc(..3, min_num = MIN_NUM, use_neg_pairs = T, diag = T, initialization = "random")
-  }))
+# print("Learning MMC metrics with random initialization and negative training examples")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# mmc_metrics <- mmc_metrics %>%
+#   mutate(MMC_rand = pmap(list(Q, R_doc, Tr), ~ {
+#     pb$tick(); 
+#     learn_mmc(..3, min_num = MIN_NUM, use_neg_pairs = T, diag = T, initialization = "random")
+#   }))
 
-print("Learning MMC metrics on parametric data with identity initialization and negative training examples")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-mmc_metrics <- mmc_metrics %>%
-  mutate(MMC_par_id = pmap(list(Q, R_doc, Tr_p), ~ {
-    pb$tick(); 
-    learn_mmc(..3, min_num = MIN_NUM, use_neg_pairs = T, diag = T, initialization = "identity")
-  }))
-
-print("Learning MMC metrics on parametric data with random initialization and negative training examples")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-mmc_metrics <- mmc_metrics %>%
-  mutate(MMC_par_rand = pmap(list(Q, R_doc, Tr_p), ~ {
-    pb$tick(); 
-    learn_mmc(..3, min_num = MIN_NUM, use_neg_pairs = T, diag = T, initialization = "random")
-  }))
+# print("Learning MMC metrics on parametric data with identity initialization and negative training examples")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# mmc_metrics <- mmc_metrics %>%
+#   mutate(MMC_par_id = pmap(list(Q, R_doc, Tr_p), ~ {
+#     pb$tick(); 
+#     learn_mmc(..3, min_num = MIN_NUM, use_neg_pairs = T, diag = T, initialization = "identity")
+#   }))
+# 
+# print("Learning MMC metrics on parametric data with random initialization and negative training examples")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# mmc_metrics <- mmc_metrics %>%
+#   mutate(MMC_par_rand = pmap(list(Q, R_doc, Tr_p), ~ {
+#     pb$tick(); 
+#     learn_mmc(..3, min_num = MIN_NUM, use_neg_pairs = T, diag = T, initialization = "random")
+#   }))
 
 # write_rds(itml_metrics, paste0(here(), "/itml_metrics.rds"))
 
-write_rds(mmc_metrics, paste0(here(), "/mmc_metrics.rds"))
+write_rds(learned_metrics, paste0(here(), "/learned_metrics.rds"))
 
 # set.seed(27)
 # i <- sample.int(nrow(training_sets), 1) # 22913
