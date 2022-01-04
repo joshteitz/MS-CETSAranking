@@ -154,7 +154,7 @@ IR_Par <- function(tc, M = NULL) {
 # IR2 <- IR2 %>% mutate(ITML_par_neg = map2_int(training_sets$TC, itml_metrics$ITML_par_neg, ~{pb$tick(); IR_Par(.x, .y)}))
 
 # IR: Results for IR-Eucl, IR-Pear, IR-Par, IR-ITML, IR-ITML-neg, IR-MMC-neg
-IR <- tibble(Q = itml_metrics$Q, R_doc = itml_metrics$R_doc)
+IR <- tibble(Q = learned_metrics$Q, R_doc = learned_metrics$R_doc)
 
 print("Results for IR-Eucl...")
 pb <- progress_bar$new(total = nrow(training_sets))
