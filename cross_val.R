@@ -142,10 +142,10 @@ learn_metrics_cv <- function(cv_ints) {
     print(paste0("Learning ITML-neg metric for label ", l, "..."))
     itml_neg_metrics[[l]] <- learn_itml(tr, min_num = length(tr$y_pairs), use_neg_pairs = T, verbose = T)
     
-    print(paste0("Learning MMC metric for label ", l, "..."))
-    mmc_neg_metrics[[l]] <- learn_mmc(tr, min_num = length(tr$y_pairs), use_neg_pairs = T, diag = F, initialization = "identity", verbose = T)
-    
     print(paste0("Learning MMC-neg metric for label ", l, "..."))
+    mmc_neg_metrics[[l]] <- learn_mmc(tr, min_num = length(tr$y_pairs), use_neg_pairs = T, diag = F, initialization = "identity", verbose = T, max_iter = 200L)
+    
+    print(paste0("Learning MMC-diag-neg metric for label ", l, "..."))
     mmc_diag_neg_metrics[[l]] <- learn_mmc(tr, min_num = length(tr$y_pairs), use_neg_pairs = T, diag = T, initialization = "identity", verbose = T)
   }
   

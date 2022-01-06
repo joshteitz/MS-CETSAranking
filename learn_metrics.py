@@ -31,7 +31,7 @@ def learn_itml(tr, min_num = 10, use_neg_pairs = True, verbose = False, max_iter
 
   return(itml.get_mahalanobis_matrix())
   
-def learn_mmc(tr, min_num = 10, use_neg_pairs = True, diag = True, initialization = "identity", verbose = False):
+def learn_mmc(tr, min_num = 10, use_neg_pairs = True, diag = True, initialization = "identity", verbose = False, max_iter = 100):
 
   # if no training data
   if (tr is None):
@@ -42,7 +42,7 @@ def learn_mmc(tr, min_num = 10, use_neg_pairs = True, diag = True, initializatio
     return None
   
   # fit model to training data
-  mmc = MMC(preprocessor = tr["X"], diagonal = diag, init = initialization, verbose = verbose)
+  mmc = MMC(preprocessor = tr["X"], max_iter = max_iter, diagonal = diag, init = initialization, verbose = verbose)
   if use_neg_pairs:
     try:
       mmc.fit(tr["pairs_indices"], tr["y_pairs"])
