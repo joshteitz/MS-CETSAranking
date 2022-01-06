@@ -3,7 +3,7 @@ from metric_learn import MMC
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-def learn_itml(tr, min_num = 10, use_neg_pairs = True):
+def learn_itml(tr, min_num = 10, use_neg_pairs = True, verbose = False):
 
   # if no training data
   if (tr is None):
@@ -14,7 +14,7 @@ def learn_itml(tr, min_num = 10, use_neg_pairs = True):
     return None
   
   # fit model to training data
-  itml = ITML(preprocessor = tr["X"])
+  itml = ITML(preprocessor = tr["X"], verbose = verbose)
   if use_neg_pairs:
     try:
       itml.fit(tr["pairs_indices"], tr["y_pairs"])
@@ -31,7 +31,7 @@ def learn_itml(tr, min_num = 10, use_neg_pairs = True):
 
   return(itml.get_mahalanobis_matrix())
   
-def learn_mmc(tr, min_num = 10, use_neg_pairs = True, diag = True, initialization = "identity"):
+def learn_mmc(tr, min_num = 10, use_neg_pairs = True, diag = True, initialization = "identity", verbose = False):
 
   # if no training data
   if (tr is None):
@@ -42,7 +42,7 @@ def learn_mmc(tr, min_num = 10, use_neg_pairs = True, diag = True, initializatio
     return None
   
   # fit model to training data
-  mmc = MMC(preprocessor = tr["X"], diagonal = diag, init = initialization)
+  mmc = MMC(preprocessor = tr["X"], diagonal = diag, init = initialization, verbose = verbose)
   if use_neg_pairs:
     try:
       mmc.fit(tr["pairs_indices"], tr["y_pairs"])
