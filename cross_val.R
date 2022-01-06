@@ -126,6 +126,7 @@ learn_metrics_cv <- function(cv_ints) {
   lbls <- cv_ints$Label %>% unique %>% sort
   itml_metrics <- vector(mode = "list", length = length(lbls))
   itml_neg_metrics <- vector(mode = "list", length = length(lbls))
+  mmc_metrics <- vector(mode = "list", length = length(lbls))
   mmc_neg_metrics <- vector(mode = "list", length = length(lbls))
   for (l in lbls) {
     
@@ -139,6 +140,9 @@ learn_metrics_cv <- function(cv_ints) {
     
     print(paste0("Learning ITML-neg metric for label ", l, "..."))
     itml_neg_metrics[[l]] <- learn_itml(tr, min_num = length(tr$y_pairs), use_neg_pairs = T, verbose = T)
+    
+    print(paste0("Learning MMC metric for label ", l, "..."))
+    mmc_metrics[[l]] <- learn_mmc(tr, min_num = length(tr$y_pairs), use_neg_pairs = F, diag = F, initialization = "identity", verbose = T)
     
     print(paste0("Learning MMC-neg metric for label ", l, "..."))
     mmc_neg_metrics[[l]] <- learn_mmc(tr, min_num = length(tr$y_pairs), use_neg_pairs = T, diag = T, initialization = "identity", verbose = T)

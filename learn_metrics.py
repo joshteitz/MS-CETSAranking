@@ -14,7 +14,7 @@ def learn_itml(tr, min_num = 10, use_neg_pairs = True, verbose = False):
     return None
   
   # fit model to training data
-  itml = ITML(preprocessor = tr["X"], verbose = verbose)
+  itml = ITML(preprocessor = tr["X"], max_iter = 200, verbose = verbose)
   if use_neg_pairs:
     try:
       itml.fit(tr["pairs_indices"], tr["y_pairs"])
