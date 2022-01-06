@@ -3,7 +3,7 @@ from metric_learn import MMC
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-def learn_itml(tr, min_num = 10, use_neg_pairs = True, verbose = False):
+def learn_itml(tr, min_num = 10, use_neg_pairs = True, verbose = False, max_iter = 100):
 
   # if no training data
   if (tr is None):
@@ -14,7 +14,7 @@ def learn_itml(tr, min_num = 10, use_neg_pairs = True, verbose = False):
     return None
   
   # fit model to training data
-  itml = ITML(preprocessor = tr["X"], max_iter = 200, verbose = verbose)
+  itml = ITML(preprocessor = tr["X"], max_iter = max_iter, verbose = verbose)
   if use_neg_pairs:
     try:
       itml.fit(tr["pairs_indices"], tr["y_pairs"])

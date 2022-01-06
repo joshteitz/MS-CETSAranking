@@ -71,6 +71,7 @@ cv_ints <- ints %>% filter(Num_pubs >= 2) %>% select(ProteinA, ProteinB)
 
 # Randomly label the interactions so that they can be partitioned into five sets of approximately the same
 # size. 
+set.seed(27)
 cv_ints <- cv_ints %>%
   mutate(Label = rep(1:5, ceiling(nrow(cv_ints) /5)) %>% sample(., size = nrow(cv_ints)))
 
