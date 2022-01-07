@@ -110,23 +110,23 @@ ints <- ints %>%
 print("Running IR-ITML for each test collection...")
 pb <- progress_bar$new(total = nrow(ints))
 # pb <- progress_bar$new(total = 100)
-res <- tibble(ITML_A = map2_int(ints$TCA, ints[inds,]$Label, ~ {pb$tick(); IR_Mahal(.x, M = ITML[[.y]])}))
+res <- tibble(ITML_A = map2_int(ints$TCA, ints$Label, ~ {pb$tick(); IR_Mahal(.x, M = ITML[[.y]])}))
 
 pb <- progress_bar$new(total = nrow(ints))
 # pb <- progress_bar$new(total = 100)
 res <- res %>%
-  mutate(ITML_B = map2_int(ints$TCB, ints[inds,]$Label, ~ {pb$tick(); IR_Mahal(.x, M = ITML[[.y]])}))
+  mutate(ITML_B = map2_int(ints$TCB, ints$Label, ~ {pb$tick(); IR_Mahal(.x, M = ITML[[.y]])}))
 
 print("Running IR-MMC-diag-neg for each test collection...")
 pb <- progress_bar$new(total = nrow(ints))
 # pb <- progress_bar$new(total = 100)
 res <- res %>%
-  mutate(MMC_diag_neg_A = map2_int(ints$TCA, ints[inds,]$Label, ~ {pb$tick(); IR_Mahal(.x, M = MMC_diag_neg[[.y]])}))
+  mutate(MMC_diag_neg_A = map2_int(ints$TCA, ints$Label, ~ {pb$tick(); IR_Mahal(.x, M = MMC_diag_neg[[.y]])}))
 
 pb <- progress_bar$new(total = nrow(ints))
 # pb <- progress_bar$new(total = 100)
 res <- res %>%
-  mutate(MMC_diag_neg_B = map2_int(ints$TCB, ints[inds,]$Label, ~ {pb$tick(); IR_Mahal(.x, M = MMC_diag_neg[[.y]])}))
+  mutate(MMC_diag_neg_B = map2_int(ints$TCB, ints$Label, ~ {pb$tick(); IR_Mahal(.x, M = MMC_diag_neg[[.y]])}))
 
 print("Running IR-Eucl for each test collection")
 pb <- progress_bar$new(total = nrow(ints))
