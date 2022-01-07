@@ -155,4 +155,5 @@ learn_metrics_cv <- function(cv_ints) {
 cv_metrics <- learn_metrics_cv(cv_ints)
 write_rds(cv_ints, paste0(here(), "/cv_ints.rds"))
 write_rds(cv_metrics, paste0(here(), "/cv_metrics.rds"))
+write_rds(interactors, paste0(here(), "/interactors.rds"))
   
