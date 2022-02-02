@@ -1,4 +1,4 @@
-library(here())
+library(here)
 
 source(paste0(here(), "/load_data.R"))
 

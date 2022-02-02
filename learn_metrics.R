@@ -2,6 +2,7 @@ library(reticulate)
 library(tidyverse)
 library(conflicted)
 library(progress)
+library(here)
 
 conflict_prefer("filter", "dplyr")
 conflict_prefer("select", "dplyr")
@@ -30,6 +31,7 @@ rm_tr_pair <- function(tr, doc) {
 }
 
 # For each test collection, learn an ITML metric based on the query's positive training pairs.
+print("Learning an ITML metric based on each protein's positive training pairs.")
 pb <- progress_bar$new(total = nrow(test_collections))
 itml_pos <- test_collections %>%
   inner_join(tr_pos, by = c("Query" = "Protein")) %>%
