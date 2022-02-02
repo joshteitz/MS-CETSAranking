@@ -4,11 +4,17 @@ source(paste0(here(), "/load_data.R"))
 
 # melting data
 mdata <- load_mdata()
-mparams <- param_mdata(mdata)
+# mparams <- param_mdata(mdata)
+
+# test collections
+test_collections <- read_rds(paste0(here(), "/test_collections.rds"))
+
+# ITML metrics trained on positive pairs
+itml_pos <- read_rds(paste0(here(), "/itml_pos.rds"))
 
 # Load test collections and learned metrics
-training_sets <- read_rds(paste0(here(), "/training_sets.rds"))
-learned_metrics <- read_rds(paste0(here(), "/learned_metrics.rds"))
+# training_sets <- read_rds(paste0(here(), "/training_sets.rds"))
+# learned_metrics <- read_rds(paste0(here(), "/learned_metrics.rds"))
 # itml_metrics <- read_rds(paste0(here(), "/itml_metrics.rds"))
 # mmc_metrics <- read_rds(paste0(here(), "/mmc_metrics.rds"))
 
@@ -42,7 +48,7 @@ IR_Mahal <- function(tc, M = NULL) {
   rk <- dists$Protein
   
   # Ranks of relevant document
-  return(match(tc$R$Document, rk))
+  return(match(tc$R$D, rk))
 }
 
 # IR-Pear: Rank documents in order of increasing Pearson dissimilarity
@@ -70,7 +76,7 @@ IR_Pear <- function(tc) {
   rk <- cors$Protein
   
   # Ranks of relevant document
-  return(match(tc$R$Document, rk))
+  return(match(tc$R$D, rk))
 }
 
 # IR-Par: Rank documents in order of increasing Pearson dissimilarity
@@ -106,8 +112,24 @@ IR_Par <- function(tc, M = NULL) {
   rk <- dists$Protein
   
   # Ranks of relevant documents
-  return(match(tc$R$Document, rk))
+  return(match(tc$R$D, rk))
 }
+
+print("Run IR-Eucl on each test collection...")
+pb <- progress_bar$new(total = nrow(test_collections))
+eucl_res <- test_collections %>%
+  mutate(Rank = map_int(TC, ~ {pb$tick(); IR_Mahal(.x, M = diag(1L, 9))})) %>%
+  select(-TC)
+
+print("Run IR-ITML-pos on each test collection...")
+pb <- progress_bar$new(total = nrow(test_collections))
+itml_pos_res <- test_collections %>%
+  inner_join(itml_pos, by = c("Query" = "Query", "Rel_doc" = "Rel_doc")) %>%
+  mutate(Rank = map2_int(TC, Metric, ~ {pb$tick(); IR_Mahal(.x, M = .y)})) %>%
+  select(-TC, -Metric)
+
+write_rds(eucl_res, paste0(here(), "/eucl_res.rds"))
+write_rds(itml_pos_res, paste0(here(), "/itml_pos_res.rds"))
 
 # set.seed(27)
 # inds <- sample.int(nrow(training_sets), 100)
@@ -153,38 +175,38 @@ IR_Par <- function(tc, M = NULL) {
 # # pb <- progress_bar$new(total = 100)
 # IR2 <- IR2 %>% mutate(ITML_par_neg = map2_int(training_sets$TC, itml_metrics$ITML_par_neg, ~{pb$tick(); IR_Par(.x, .y)}))
 
-# IR: Results for IR-Eucl, IR-Pear, IR-Par, IR-ITML, IR-ITML-neg, IR-MMC-neg
-IR <- tibble(Q = learned_metrics$Q, R_doc = learned_metrics$R_doc)
-
-print("Results for IR-Eucl...")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-IR <- IR %>% mutate(Eucl = map_int(training_sets$TC, ~{pb$tick(); IR_Mahal(.x, diag(9))}))
-
-print("Results for IR-Pear...")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-IR <- IR %>% mutate(Pear = map_int(training_sets$TC, ~{pb$tick(); IR_Pear(.x)}))
-
-print("Results for IR-Par...")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-IR <- IR %>% mutate(Par = map_int(training_sets$TC, ~{pb$tick(); IR_Par(.x, diag(3))}))
-
-print("Results for IR-ITML...")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-IR <- IR %>% mutate(ITML = map2_int(training_sets$TC, learned_metrics$ITML, ~{pb$tick(); IR_Mahal(.x, .y)}))
-
-print("Results for IR-ITML-neg...")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-IR <- IR %>% mutate(ITML_neg = map2_int(training_sets$TC, learned_metrics$ITML_neg, ~{pb$tick(); IR_Mahal(.x, .y)}))
-
-print("Results for IR-MMC-id...")
-pb <- progress_bar$new(total = nrow(training_sets))
-# pb <- progress_bar$new(total = 100)
-IR <- IR %>% mutate(MMC_neg = map2_int(training_sets$TC, learned_metrics$MMC_neg, ~{pb$tick(); IR_Mahal(.x, .y)}))
+# # IR: Results for IR-Eucl, IR-Pear, IR-Par, IR-ITML, IR-ITML-neg, IR-MMC-neg
+# IR <- tibble(Q = learned_metrics$Q, R_doc = learned_metrics$R_doc)
+# 
+# print("Results for IR-Eucl...")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# IR <- IR %>% mutate(Eucl = map_int(training_sets$TC, ~{pb$tick(); IR_Mahal(.x, diag(9))}))
+# 
+# print("Results for IR-Pear...")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# IR <- IR %>% mutate(Pear = map_int(training_sets$TC, ~{pb$tick(); IR_Pear(.x)}))
+# 
+# print("Results for IR-Par...")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# IR <- IR %>% mutate(Par = map_int(training_sets$TC, ~{pb$tick(); IR_Par(.x, diag(3))}))
+# 
+# print("Results for IR-ITML...")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# IR <- IR %>% mutate(ITML = map2_int(training_sets$TC, learned_metrics$ITML, ~{pb$tick(); IR_Mahal(.x, .y)}))
+# 
+# print("Results for IR-ITML-neg...")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# IR <- IR %>% mutate(ITML_neg = map2_int(training_sets$TC, learned_metrics$ITML_neg, ~{pb$tick(); IR_Mahal(.x, .y)}))
+# 
+# print("Results for IR-MMC-id...")
+# pb <- progress_bar$new(total = nrow(training_sets))
+# # pb <- progress_bar$new(total = 100)
+# IR <- IR %>% mutate(MMC_neg = map2_int(training_sets$TC, learned_metrics$MMC_neg, ~{pb$tick(); IR_Mahal(.x, .y)}))
 
 # # IR3: Results for IR-MMC-id, IR-MMC-rand, IR-MMC-Par-id, IR-MMC-Par-rand
 # IR3 <- tibble(Q = mmc_metrics$Q, R_doc = mmc_metrics$R_doc)
@@ -211,7 +233,7 @@ IR <- IR %>% mutate(MMC_neg = map2_int(training_sets$TC, learned_metrics$MMC_neg
 
 # write_rds(IR1, paste0(here(), "/IR1.rds"))
 # write_rds(IR2, paste0(here(), "/IR2.rds"))
-write_rds(IR, paste0(here(), "/IR.rds"))
+# write_rds(IR, paste0(here(), "/IR.rds"))
 
 # IR1 <- read_rds(paste0(here(), "/IR1.rds"))
 # IR2 <- read_rds(paste0(here(), "/IR2.rds"))

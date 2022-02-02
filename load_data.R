@@ -105,7 +105,7 @@ make_unit_var <- function(mdata, numeric_cols = NULL) {
   }
   mdata_unit_var <- 
     mdata %>%
-    mutate(across({{numeric_cols}}, scale1))
+    mutate(across(any_of({{numeric_cols}}), scale1))
   return(mdata_unit_var)
 }
 
