@@ -6,6 +6,7 @@ source(paste0(here(), "/load_data.R"))
 mdata <- load_mdata()
 
 # convert melting data to parametric melting data
+print("Converting melting data to parametric melting data...")
 mparams <- param_mdata(mdata) %>% drop_na()
 
 # pairwise interactions from table S2
@@ -86,6 +87,7 @@ test_collections <- bind_rows(
 # Each test collection contains a single query, single relevant document and nineteen non-relevant documents.
 NUM_NON_REL = 19
 set.seed(27)
+print("Making test collections...")
 pb <- progress_bar$new(total = nrow(test_collections))
 test_collections <- test_collections %>%
   inner_join(interactors_all, by = c("Query" = "Protein")) %>%
