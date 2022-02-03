@@ -3,6 +3,11 @@ from metric_learn import MMC
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+# def learn_itml(tuples, y):
+#   itml = ITML()
+#   itml.fit(tuples, y)
+#   return(itml.get_mahalanobis_matrix())
+
 def learn_itml(tr):
   # fit model to training data
   itml = ITML(preprocessor = tr["X"])

@@ -12,14 +12,13 @@ interactors_2pubs <- read_rds(paste0(here(), "/interactors_2pubs.rds"))
 # in a format suitable for the python library metric-learn
 make_pos_training <- function(prot, interactors, md) {
   # melting data
-  X <- bind_rows(
-    md %>% filter(Protein == prot) %>% select(-Protein),
-    md %>% filter(Protein %in% interactors) %>% select(-Protein)
-  ) %>%
-    make_unit_var(., numeric_cols = c("Param_b", "Param_c", "Param_e")) %>%
-    as.matrix(.)
+  X <- tibble(Protein = c(prot, interactors)) %>%
+    inner_join(md, by = "Protein") %>%
+    make_unit_var(., numeric_cols = c("Param_b", "Param_c", "Param_e"))
+  all_prots <- X$Protein
+  X <- X %>% select(-Protein) %>% as.matrix()
   colnames(X) <- NULL
-  rownames(X) <- c(prot, interactors)
+  rownames(X) <- all_prots
   
   # indices of positive pairs
   pairs_indices <- expand_grid(0L, 1:(nrow(X) - 1) %>% as.integer) %>%
