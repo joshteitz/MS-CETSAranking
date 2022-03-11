@@ -49,24 +49,40 @@ load_mdata <- function(cell_line = "K562") {
 }
 
 # Load protein-protein interactions 
-load_interactions <- function() {
+load_interactions <- function(cell_line = c("S2", "293T", "HCT116")) {
   
-  # file/sheet that contains interactions
-  file_ips <- "Tables_S1_to_S18.xlsx"
-  sheet_ips <- "Table S2"
+  if (cell_line[1] == "S2") {
+    
+    # file/sheet that contains interactions
+    file_name <- "Tables_S1_to_S18.xlsx"
+    sheet_name <- "Table S2"
+    
+    # load data
+    ints <- read_excel(paste0(LOC, "/", file_name), sheet = sheet_name, skip = 2) %>%
+      select(ProteinA = `Protein A`, ProteinB = `Protein B`, Num_pubs = `No. of Publications`)
+    
+    # make sure ProteinA < ProteinB and make sure there are no duplicate interactions.
+    ints <- ints %>% mutate(Proteins = map2(ProteinA, ProteinB, ~ sort(c(.x, .y)))) %>%
+      mutate(ProteinA = map_chr(Proteins, ~ .x[1])) %>%
+      mutate(ProteinB = map_chr(Proteins, ~ .x[2])) %>%
+      select(-Proteins) %>%
+      distinct(ProteinA, ProteinB, .keep_all = T)
+    
+  } else if (cell_line[1] %in% c("293T", "HCT116")) {
+    
+    file_name = switch(
+      cell_line[1],
+      "293T" = "interactions_293T.rds",
+      "HCT116" = "interactions_hct116.rds"
+    )
+    
+    ints <- read_rds(here("data", "BioPlex", file_name))
+    
+  } else {
+    stop("Invalid cell line entered")
+  }
   
-  # load data
-  ips <- read_excel(paste0(LOC, "/", file_ips), sheet = sheet_ips, skip = 2) %>%
-    select(ProteinA = `Protein A`, ProteinB = `Protein B`, Num_pubs = `No. of Publications`)
-  
-  # make sure ProteinA < ProteinB and make sure there are no duplicate interactions.
-  ips <- ips %>% mutate(Proteins = map2(ProteinA, ProteinB, ~ sort(c(.x, .y)))) %>%
-    mutate(ProteinA = map_chr(Proteins, ~ .x[1])) %>%
-    mutate(ProteinB = map_chr(Proteins, ~ .x[2])) %>%
-    select(-Proteins) %>%
-    distinct(ProteinA, ProteinB, .keep_all = T)
-  
-  return(ips)
+  return(ints)
 }
 
 # Load CORUM protein complex data
@@ -130,4 +146,100 @@ get_drm <- function(df) {
       list(coefficients = c(NA, NA, NA))
     }
   )
+}
+
+# FUNCTION: load proteins that come from a particular subcellular location
+load_prots_loc <- function(loc) {
+  
+  file_name = switch(
+    loc,
+    "nucleoplasm" = "subcell_loc_nucleoplasm.tsv",
+    "nuclear-membrane" = "subcell_loc_nuclear_membrane.tsv",
+    "nucleoli" = "subcell_loc_nucleoli.tsv",
+    "actin-filaments" = "subcell_loc_actin_filaments.tsv",
+    "intermediate-filaments" = "subcell_loc_intermediate_filaments.tsv",
+    "centrosome" = "subcell_loc_centrosome.tsv",
+    "microtubules" = "subcell_loc_microtubules.tsv",
+    "cytosol" = "subcell_loc_cytosol.tsv",
+    "mitochondria" = "subcell_loc_mitochondria.tsv",
+    "endoplasmic-reticulum" = "subcell_loc_endoplasmic_reticulum.tsv",
+    "vesicles" = "subcell_loc_vesicles.tsv",
+    "golgi-apparatus" = "subcell_loc_golgi_apparatus.tsv",
+    "plasma-membrane" = "subcell_loc_plasma_membrane.tsv"
+  )
+  
+  if (is.null(file_name)) {
+    stop("Invalid subcellular location given to `loc` argument!")
+  }
+  
+  prots <- read_tsv(here("data", "HumanProteinAtlas", file_name)) %>% pull(Uniprot)
+  # prots <- read_tsv(here("data", "HumanProteinAtlas", file_name))
+  return(prots)
+}
+
+# # FUNCTION: load bait-prey data
+# #   fn: file name
+# load_bait_prey <- function(fn) {
+#   
+#   file_name = switch(
+#     fn,
+#     "Ewings07" = "Ewings07.xls",
+#     "BioPlex293T" = "BioPlexBaitPrey293T.tsv"
+#   )
+#   
+#   if (is.null(file_name)) {
+#     stop("Invalid file name given!")
+#   }
+#   
+#   if (fn == "Ewings07") {
+#     bp <- read_excel(here("data", file_name))
+#   } else if (fn == "BioPlex293T") {
+#     bp <- read_tsv(here("data", file_name))  
+#   }else {
+#     bp <- read_excel(here("data", file_name))
+#   }
+#   
+#   return(bp)
+# }
+
+# FUNCTION: load BioPlex 3.0 data
+#   fn: file name
+load_bioplex <- function(fn) {
+  
+  file_name = switch(
+    fn,
+    "bait_prey_293T" = "bait_prey_293T.tsv",
+    "bait_prey_hct116" = "bait_prey_hct116.tsv",
+    "interactions_293T" = "interactions_293T.tsv",
+    "interactions_hct116" = "interactions_hct116.tsv"
+  )
+  
+  if (is.null(file_name)) {
+    stop("Invalid file name given!")
+  }
+  
+  if (fn %in% c("interactions_293T", "interactions_hct116")) {
+    d <- read_tsv(here("data", "BioPlex", file_name)) %>%
+      select(GeneA, SymbolA, GeneB, SymbolB, pNI, pInt)
+  } else if (fn %in% c("bait_prey_293T", "bait_prey_hct116")) {
+    d <- read_tsv(here("data", "BioPlex", file_name)) %>%
+      select(bait_symbol, bait_geneid, symbol, gene_id)
+  }
+  
+  return(d)
+}
+
+# FUNCTION: load bait/prey data
+load_bait_prey <- function(cell_line) {
+  
+  file_name = switch(
+    cell_line,
+    "293T" = "bait_prey_293T.rds",
+    "HCT116" = "bait_prey_hct116.rds"
+  )
+  
+  if (is.null(file_name)) stop("Invalid file name given!")
+  
+  bp <- read_rds(here("data", "BioPlex", file_name))
+  return(bp)
 }
