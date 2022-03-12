@@ -303,7 +303,7 @@ write_rds(ir4, here("ir", "ir4.rds"))
 # Bait/prey data: 293T
 # Interactions: S2
 tcs1 <- read_rds(here("tcs", "tcs1.rds"))
-ir5 <- perform_IR(tcs1, mdata_293T, mparams_293t, SZ_NULL)
+ir5 <- perform_IR(tcs1, mdata_293t, mparams_293t, SZ_NULL)
 write_rds(ir5, here("ir", "ir5.rds"))
 
 # Melting data: 293T
