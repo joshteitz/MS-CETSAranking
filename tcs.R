@@ -63,7 +63,7 @@ make_all_tcs <- function(
   if (cell_ints[1] == "S2") {
     ints <- load_interactions(cell_ints[1]) %>% filter(Num_pubs >= 2)
   } else {
-    ints <- load_interactions(cell_ints[1]) %>% filter(pInt > .95)
+    ints <- load_interactions(cell_ints[1])
   }
   
   # # Remove each interaction where at least one protein does not have parametric melting data

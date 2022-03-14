@@ -271,12 +271,12 @@ mparams_k562 <- param_mdata(mdata_k562)
 mparams_293t <- param_mdata(mdata_293t)
 mparams_hct116 <- param_mdata(mdata_hct116)
 
-# # Melting data: K562
-# # Bait/prey data: 293T
-# # Interactions: S2 with more than two citations
-# tcs1 <- read_rds(here("tcs", "tcs1.rds"))
-# ir1 <- perform_IR(tcs1, mdata_k562, mparams_k562, SZ_NULL)
-# write_rds(ir1, here("ir", "ir1.rds"))
+# Melting data: K562
+# Bait/prey data: 293T
+# Interactions: S2 with more than two citations
+tcs1 <- read_rds(here("tcs", "tcs1.rds"))
+ir1 <- perform_IR(tcs1, mdata_k562, mparams_k562, SZ_NULL)
+write_rds(ir1, here("ir", "ir1.rds"))
 
 # Melting data: K562
 # Bait/prey data: 293T
@@ -285,12 +285,12 @@ tcs2 <- read_rds(here("tcs", "tcs2.rds"))
 ir2 <- perform_IR(tcs2, mdata_k562, mparams_k562, SZ_NULL)
 write_rds(ir2, here("ir", "ir2.rds"))
 
-# # Melting data: K562
-# # Bait/prey data: HCT116
-# # Interactions: S2 with more than two citations
-# tcs3 <- read_rds(here("tcs", "tcs3.rds"))
-# ir3 <- perform_IR(tcs3, mdata_k562, mparams_k562, SZ_NULL)
-# write_rds(ir3, here("ir", "ir3.rds"))
+# Melting data: K562
+# Bait/prey data: HCT116
+# Interactions: S2 with more than two citations
+tcs3 <- read_rds(here("tcs", "tcs3.rds"))
+ir3 <- perform_IR(tcs3, mdata_k562, mparams_k562, SZ_NULL)
+write_rds(ir3, here("ir", "ir3.rds"))
 
 # Melting data: K562
 # Bait/prey data: HCT116
@@ -299,12 +299,12 @@ tcs4 <- read_rds(here("tcs", "tcs4.rds"))
 ir4 <- perform_IR(tcs4, mdata_k562, mparams_k562, SZ_NULL)
 write_rds(ir4, here("ir", "ir4.rds"))
 
-# # Melting data: 293T
-# # Bait/prey data: 293T
-# # Interactions: S2
-# tcs1 <- read_rds(here("tcs", "tcs1.rds"))
-# ir5 <- perform_IR(tcs1, mdata_293t, mparams_293t, SZ_NULL)
-# write_rds(ir5, here("ir", "ir5.rds"))
+# Melting data: 293T
+# Bait/prey data: 293T
+# Interactions: S2
+tcs1 <- read_rds(here("tcs", "tcs1.rds"))
+ir5 <- perform_IR(tcs1, mdata_293t, mparams_293t, SZ_NULL)
+write_rds(ir5, here("ir", "ir5.rds"))
 
 # Melting data: 293T
 # Bait/prey data: 293T
@@ -313,12 +313,12 @@ tcs2 <- read_rds(here("tcs", "tcs2.rds"))
 ir6 <- perform_IR(tcs2, mdata_293t, mparams_293t, SZ_NULL)
 write_rds(ir6, here("ir", "ir6.rds"))
 
-# # Melting data: HCT116
-# # Bait/prey data: HCT116
-# # Interactions: S2
-# tcs3 <- read_rds(here("tcs", "tcs3.rds"))
-# ir7 <- perform_IR(tcs3, mdata_hct116, mparams_hct116, SZ_NULL)
-# write_rds(ir7, here("ir", "ir7.rds"))
+# Melting data: HCT116
+# Bait/prey data: HCT116
+# Interactions: S2
+tcs3 <- read_rds(here("tcs", "tcs3.rds"))
+ir7 <- perform_IR(tcs3, mdata_hct116, mparams_hct116, SZ_NULL)
+write_rds(ir7, here("ir", "ir7.rds"))
 
 # Melting data: HCT116
 # Bait/prey data: HCT116
